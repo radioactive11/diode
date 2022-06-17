@@ -1,4 +1,4 @@
-GIT_REPO=https://github.com/radioactive11/fastapi-sample-app
+GIT_REPO=https://github.com/radioactive11/fastapi-sample-app ./app
 REPO_NAME=fastapi-sample-app
 
 sudo apt update -y
@@ -18,4 +18,12 @@ sudo apt install supervisor -y
 
 cd
 sudo rm /etc/nginx/sites-enabled/default
-sudo touch /etc/nginx/sites-enabled/app.conf
+curl -o /etc/nginx/sites-enabled/app.conf https://raw.githubusercontent.com/radioactive11/diode-zener/master/build/nginx.conf?token=GHSAT0AAAAAABQBZNC7HR7KILHRYYS3RGYMYVLSTDA
+
+sudo systemctl restart nginx
+
+sudo mkdir -p /var/log/app
+sudo touch /var/log/app/app.err.log
+sudo touch /var/log/app/app.out.log
+
+
