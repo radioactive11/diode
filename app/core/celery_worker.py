@@ -10,9 +10,6 @@ from celery.utils.log import get_task_logger
 from celery.result import AsyncResult
 
 from app.core.deploy import Deploy
-from app.schema.deploy import DeployRepo
-
-from app.errors import connection
 
 celery = Celery("tasks", broker="redis://localhost:6379/0", backend="rpc://")
 
@@ -52,8 +49,7 @@ class Deploy(celery.Task):
             return False
 
     def run_script(self) -> bool:
-
-        SHELL_FILE_PATH = os.path.join(os.getcwd(), "build", "fastapi.sh")
+        SHELL_FILE_PATH = os.path.join(os.getcwd(), "build", f"{self.__app_type}.sh")
 
         with open(SHELL_FILE_PATH, "r") as file:
             commands = file.readlines()
@@ -98,7 +94,9 @@ class Deploy(celery.Task):
             else:
                 print(output)
 
-        supervisor_command = f"command=/root/app/{CONST_SUPERVISOR_CONFIG['fastapi']}"
+        supervisor_command = (
+            f"command=/root/app/{CONST_SUPERVISOR_CONFIG[self.__app_type]}"
+        )
         stdin, stdout, stderr = self.__ssh_client.exec_command(
             f"sudo sed -i '3s|.*|{supervisor_command}|' /etc/supervisor/conf.d/app.conf",
             get_pty=True,
