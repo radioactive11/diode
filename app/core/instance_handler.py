@@ -15,7 +15,16 @@ def create_instance(details: instance.CreateInstance, client: LinodeClient) -> D
     ip4_addr = new_linode.ipv4[0]
     _id = new_linode.id
 
-    return {"id": _id, "ip4_addr": ip4_addr, "password": password}
+    with open(f"./ssh_{_id}_key.txt", "w") as f:
+        f.write(password)
+
+    f.close()
+
+    return {
+        "id": _id,
+        "ip4_addr": ip4_addr,
+        "password": r"{password}".format(password=password),
+    }
 
 
 def delete_instance(details: instance.DeleteInstance, client: LinodeClient) -> bool:
@@ -23,3 +32,17 @@ def delete_instance(details: instance.DeleteInstance, client: LinodeClient) -> b
     result = instance.delete()
 
     return result
+
+
+def get_metrics(id: str, client: LinodeClient):
+    instance = Instance(client, id)
+    result = instance.stats
+
+    return result
+
+
+def get_status(instance_id: str, client: LinodeClient):
+    instance = Instance(client, instance_id)
+    result = instance.status
+
+    return {"status": result}

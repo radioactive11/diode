@@ -11,3 +11,8 @@ class CreateInstance(BaseModel):
 class DeleteInstance(BaseModel):
     token: str
     instance_id: str
+
+
+class InstanceMetrics(BaseModel):
+    token: str
+    instance_id: str

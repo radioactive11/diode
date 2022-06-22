@@ -3,7 +3,12 @@ from fastapi import APIRouter
 
 from linode_api4 import LinodeClient
 
-from app.core.instance_handler import create_instance, delete_instance
+from app.core.instance_handler import (
+    create_instance,
+    delete_instance,
+    get_metrics,
+    get_status,
+)
 from app.core.client_maker import create_client
 from app.schema import instance
 
@@ -24,3 +29,19 @@ def delete_existing_instance(request_body: instance.DeleteInstance):
     result = delete_instance(request_body, client)
 
     return {"result": result}
+
+
+@router.get("/metrics/")
+def get_instance_metrics(token: str, id: str):
+    client = create_client(token)
+    result = get_metrics(id, client)
+
+    return result
+
+
+@router.get("/status/")
+def get_instance_metrics(token: str, id: str):
+    client = create_client(token)
+    result = get_status(id, client)
+
+    return result
