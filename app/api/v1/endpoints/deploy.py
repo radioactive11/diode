@@ -15,12 +15,10 @@ def init_deploy_from_repo(request_body: DeployRepo):
     env = request_body.env
 
     result = DeployTask.delay(ip_addr, ssh_key, app_type, repo_url, env)
-    # result = dt.run_script.delay()
 
     return {"task_id": result.task_id}
 
 
-#! Convert this to a post requst later
 @router.get("/repo_status/{task_id}")
 def deployment_status(task_id: str):
     result = task_log(task_id)
