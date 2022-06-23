@@ -18,8 +18,8 @@ celery_log = get_task_logger(__name__)
 
 
 CONST_SUPERVISOR_CONFIG = {
-    "fastapi": "venv/bin/uvicorn main:app --reload",
-    "node": "npm run start --port 8000",
+    "fastapi": "/root/app/venv/bin/uvicorn main:app --reload",
+    "node": "npm run start",
 }
 
 
@@ -99,9 +99,8 @@ class Deploy(celery.Task):
 
         # * if we need to setup supervisor & nginx for the app
         if CONST_SUPERVISOR_CONFIG.get(self.__app_type):
-            supervisor_command = (
-                f"command=/root/app/{CONST_SUPERVISOR_CONFIG[self.__app_type]}"
-            )
+            # * set the supervisor command customized for each app_type
+            supervisor_command = f"command={CONST_SUPERVISOR_CONFIG[self.__app_type]}"
             stdin, stdout, stderr = self.__ssh_client.exec_command(
                 f"sudo sed -i '3s|.*|{supervisor_command}|' /etc/supervisor/conf.d/app.conf",
                 get_pty=True,
@@ -113,12 +112,15 @@ class Deploy(celery.Task):
             if stderr != "" and stdout == "":
                 return {"error": error}
 
-            env_var_command = self.__parse_env()
-            self.__ssh_client.exec_command(
-                f"sudo sed -i '5s|.*|{env_var_command}|' /etc/supervisor/conf.d/app.conf",
-                get_pty=True,
-            )
+            # * set environment variables
+            if self.__env_vars:
+                env_var_command = self.__parse_env()
+                self.__ssh_client.exec_command(
+                    f"sudo sed -i '5s|.*|{env_var_command}|' /etc/supervisor/conf.d/app.conf",
+                    get_pty=True,
+                )
 
+            # * Make supervisor read new changes
             stdin, stdout, stderr = self.__ssh_client.exec_command(
                 "sudo supervisorctl reread"
             )
@@ -149,7 +151,7 @@ class Deploy(celery.Task):
     ) -> Dict:
         self.__ssh_client: SSHClient = paramiko.client.SSHClient()
         self.__ip_addr: str = ip_addr
-        self.__ssh_key: str = r""">w+5_jrc(.nlD~7-oD*>avf8Ats;FxXnz#nF^$U5V&vwH0J=]Y16>':9zOn%5J2N}5EhC6K`PfiC`38J`S7SQikS"""
+        self.__ssh_key: str = r"""L08?DrCD;T2p>GIc8|We%@uqRoF2dw~NHBv1XRw9Xw93w2kg=;H3t\?Xc`6'29(0P;5E~vl5oLkMtKimu3CIl,)uSgBEO_2"""
 
         self.__app_type: str = app_type
         self.__git_repo: str = repo_url
