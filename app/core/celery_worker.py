@@ -1,8 +1,9 @@
+from typing import Dict
 import paramiko
 from paramiko.client import SSHClient
 
 import os
-from time import sleep
+import secrets
 
 import celery
 from celery import Celery, current_task
@@ -18,6 +19,7 @@ celery_log = get_task_logger(__name__)
 
 CONST_SUPERVISOR_CONFIG = {
     "fastapi": "venv/bin/uvicorn main:app --reload",
+    "node": "npm run start --port 8000",
 }
 
 
@@ -48,8 +50,10 @@ class Deploy(celery.Task):
             print(f"[SSH Error] - {e}")
             return False
 
-    def run_script(self) -> bool:
+    def run_script(self) -> Dict:
         SHELL_FILE_PATH = os.path.join(os.getcwd(), "build", f"{self.__app_type}.sh")
+
+        password = secrets.token_urlsafe(16)
 
         with open(SHELL_FILE_PATH, "r") as file:
             commands = file.readlines()
@@ -58,11 +62,13 @@ class Deploy(celery.Task):
 
         lookup = {
             "$GIT_REPO": self.__git_repo,
-            "$SUPERVIOR_CMD": CONST_SUPERVISOR_CONFIG[self.__app_type],
+            "$SUPERVIOR_CMD": CONST_SUPERVISOR_CONFIG.get(self.__app_type, ""),
+            "$REDIS_PW": password,
         }
 
         for command in commands:
             for token in lookup:
+                print(token)
                 command = command.replace(token, lookup[token])
 
             if command[0] == "#":
@@ -89,60 +95,70 @@ class Deploy(celery.Task):
             if error != "" and output == "":
                 print(f"Error - {error}")
                 current_task.update_state(state=error, meta={"error": "randomize"})
-                return False
+                return {"error": error}
 
-            else:
-                print(output)
+        # * if we need to setup supervisor & nginx for the app
+        if CONST_SUPERVISOR_CONFIG.get(self.__app_type):
+            supervisor_command = (
+                f"command=/root/app/{CONST_SUPERVISOR_CONFIG[self.__app_type]}"
+            )
+            stdin, stdout, stderr = self.__ssh_client.exec_command(
+                f"sudo sed -i '3s|.*|{supervisor_command}|' /etc/supervisor/conf.d/app.conf",
+                get_pty=True,
+            )
 
-        supervisor_command = (
-            f"command=/root/app/{CONST_SUPERVISOR_CONFIG[self.__app_type]}"
+            stdout = stdout.read()
+            stderr = stderr.read()
+
+            if stderr != "" and stdout == "":
+                return {"error": error}
+
+            env_var_command = self.__parse_env()
+            self.__ssh_client.exec_command(
+                f"sudo sed -i '5s|.*|{env_var_command}|' /etc/supervisor/conf.d/app.conf",
+                get_pty=True,
+            )
+
+            stdin, stdout, stderr = self.__ssh_client.exec_command(
+                "sudo supervisorctl reread"
+            )
+
+            stdout = stdout.read()
+            stderr = stderr.read()
+
+            if stderr != "" and stdout == "":
+                return {"error": error}
+
+            stdin, stdout, stderr = self.__ssh_client.exec_command(
+                "sudo supervisorctl reload"
+            )
+
+            stdout = stdout.read()
+            stderr = stderr.read()
+
+            if stderr != "" and stdout == "":
+                return {"error": error}
+
+        current_task.update_state(
+            state="Deployed", meta={"password": password, "status": "deployed"}
         )
-        stdin, stdout, stderr = self.__ssh_client.exec_command(
-            f"sudo sed -i '3s|.*|{supervisor_command}|' /etc/supervisor/conf.d/app.conf",
-            get_pty=True,
-        )
-
-        if stderr != "" and stdout == "":
-            return False
-
-        env_var_command = self.__parse_env()
-        self.__ssh_client.exec_command(
-            f"sudo sed -i '5s|.*|{env_var_command}|' /etc/supervisor/conf.d/app.conf",
-            get_pty=True,
-        )
-
-        stdin, stdout, stderr = self.__ssh_client.exec_command(
-            "sudo supervisorctl reread"
-        )
-
-        if stderr != "" and stdout == "":
-            return False
-
-        stdin, stdout, stderr = self.__ssh_client.exec_command(
-            "sudo supervisorctl reload"
-        )
-
-        if stderr != "" and stdout == "":
-            return False
+        return {"password": password, "status": "deployed"}
 
     def run(
         self, ip_addr: str, ssh_key: str, app_type: str, repo_url: str, env: dict
-    ) -> None:
+    ) -> Dict:
         self.__ssh_client: SSHClient = paramiko.client.SSHClient()
         self.__ip_addr: str = ip_addr
-        self.__ssh_key: str = (
-            r"""&i/(Kz391IM!VSw%H6nm4_!2w"E[6UXX]V=db+$`H^*4x@o`T5YbB]y+AHM!XROz"""
-        )
+        self.__ssh_key: str = r""">w+5_jrc(.nlD~7-oD*>avf8Ats;FxXnz#nF^$U5V&vwH0J=]Y16>':9zOn%5J2N}5EhC6K`PfiC`38J`S7SQikS"""
 
         self.__app_type: str = app_type
         self.__git_repo: str = repo_url
         self.__env_vars: dict = env
 
         self.connect()
-        self.run_script()
+        stat_result = self.run_script()
 
-    def print_all(self):
-        print(self.__ip_addr)
+        return stat_result
 
 
 def task_log(task_id: str):
