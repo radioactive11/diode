@@ -11,7 +11,7 @@ cd app/ && npm i --silent
 sudo apt -qq install nginx -y
 sudo apt -qq install supervisor -y
 sudo rm /etc/nginx/sites-enabled/default
-curl -o /etc/nginx/sites-enabled/app.conf --silent https://buildpacks.ap-south-1.linodeobjects.com/nginx.conf
+curl -o /etc/nginx/sites-enabled/app.conf --silent https://buildpacks.ap-south-1.linodeobjects.com/nginx_5000.conf
 sudo systemctl restart nginx
 curl -o /etc/supervisor/conf.d/app.conf --silent https://buildpacks.ap-south-1.linodeobjects.com/supervisor.conf
 # Deploying
