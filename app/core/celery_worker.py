@@ -20,6 +20,7 @@ celery_log = get_task_logger(__name__)
 CONST_SUPERVISOR_CONFIG = {
     "fastapi": "/root/app/venv/bin/uvicorn main:app --reload",
     "node": "npm run start",
+    "react": "npm run build",
 }
 
 
@@ -53,7 +54,7 @@ class Deploy(celery.Task):
     def run_script(self) -> Dict:
         SHELL_FILE_PATH = os.path.join(os.getcwd(), "build", f"{self.__app_type}.sh")
 
-        password = secrets.token_urlsafe(16)
+        password = secrets.token_urlsafe(32)
 
         with open(SHELL_FILE_PATH, "r") as file:
             commands = file.readlines()
@@ -151,7 +152,7 @@ class Deploy(celery.Task):
     ) -> Dict:
         self.__ssh_client: SSHClient = paramiko.client.SSHClient()
         self.__ip_addr: str = ip_addr
-        self.__ssh_key: str = r"""L08?DrCD;T2p>GIc8|We%@uqRoF2dw~NHBv1XRw9Xw93w2kg=;H3t\?Xc`6'29(0P;5E~vl5oLkMtKimu3CIl,)uSgBEO_2"""
+        self.__ssh_key: str = r"""wB[2k6|[lXs*l'mmpfSf4${dkIKyaY<nr%<J:C:0S~w&F@*X-$#,7A~F0}Pr%e,0U$'7t|[$LdP6meFdad98S1%Ph5w[SCL"""
 
         self.__app_type: str = app_type
         self.__git_repo: str = repo_url
