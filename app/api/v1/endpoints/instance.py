@@ -2,6 +2,7 @@ from unittest import result
 from fastapi import APIRouter
 
 from linode_api4 import LinodeClient
+from app.core.catalouge import users_linodes
 
 from app.core.instance_handler import (
     create_instance,
@@ -31,7 +32,7 @@ def delete_existing_instance(request_body: instance.DeleteInstance):
     return {"result": result}
 
 
-@router.get("/metrics/")
+@router.get("/metrics")
 def get_instance_metrics(token: str, id: str):
     client = create_client(token)
     result = get_metrics(id, client)
@@ -39,9 +40,17 @@ def get_instance_metrics(token: str, id: str):
     return result
 
 
-@router.get("/status/")
+@router.get("/status")
 def get_instance_metrics(token: str, id: str):
     client = create_client(token)
     result = get_status(id, client)
+
+    return result
+
+
+@router.get("/instances")
+def list_user_intances(token: str):
+    client = create_client(token)
+    result = users_linodes(client)
 
     return result

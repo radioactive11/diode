@@ -66,8 +66,21 @@ def available_combined(client: LinodeClient):
     return {"regions": region_list, "images": image_list, "instances": instance_list}
 
 
+def users_linodes(client: LinodeClient):
+    instances = client.linode.instances()
+    instances_list = []
+
+    for instance in instances:
+        instances_list.append(instance)
+        print(instance)
+
+    return {"instances_list": instances_list}
+
+
 if __name__ == "__main__":
+    load_dotenv()
     TOKEN = os.getenv("LINODE_PAT")
+
     client = LinodeClient(TOKEN)
-    regions = available_instances(client)
+    regions = users_linodes(client)
     pprint(regions)
