@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.core.celery_worker import DeployTask, task_log
-from app.schema.deploy import DeployRepo
+from app.core.celery_worker import DeployTask, ReDeployTask, task_log
+from app.schema.deploy import DeployRepo, ReDeployRepo
 
 router = APIRouter()
 
@@ -15,6 +15,18 @@ def init_deploy_from_repo(request_body: DeployRepo):
     env = request_body.env
 
     result = DeployTask.delay(ip_addr, ssh_key, app_type, repo_url, env)
+
+    return {"task_id": result.task_id}
+
+
+@router.post('/redeploy')
+def redeploy_from_github(request_body: ReDeployRepo):
+    ip_addr = request_body.ip_addr
+    ssh_key = request_body.ssh_key
+    app_type = request_body.app_type
+    env = request_body.env
+
+    result = ReDeployTask.delay(ip_addr, ssh_key, app_type, env)
 
     return {"task_id": result.task_id}
 
