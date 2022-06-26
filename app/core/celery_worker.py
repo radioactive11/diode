@@ -152,7 +152,7 @@ class Deploy(celery.Task):
     ) -> Dict:
         self.__ssh_client: SSHClient = paramiko.client.SSHClient()
         self.__ip_addr: str = ip_addr
-        self.__ssh_key: str = r"""wB[2k6|[lXs*l'mmpfSf4${dkIKyaY<nr%<J:C:0S~w&F@*X-$#,7A~F0}Pr%e,0U$'7t|[$LdP6meFdad98S1%Ph5w[SCL"""
+        self.__ssh_key: str = r"""VeQa7vYzwDb2]lz,.ZFeSJ94HsD>c4H_P#kz:W7]+bA2Ze:7EUl\nY#E'_g+w6W9j7:m;9*X^[q,rdEmVe'_iXDWOT:"""
 
         self.__app_type: str = app_type
         self.__git_repo: str = repo_url
@@ -162,6 +162,107 @@ class Deploy(celery.Task):
         stat_result = self.run_script()
 
         return stat_result
+
+
+class ReDeploy(celery.Task):
+    def __parse_env(self):
+        keys = self.__env_vars.keys()
+        vars_str = "environment="
+        for key in keys:
+            temp_str = f"{key}={self.__env_vars[key]},"
+            vars_str += temp_str
+
+        vars_str = vars_str[:-1]
+
+        return vars_str
+
+    def connect(self):
+        self.__ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            self.__ssh_client.connect(
+                self.__ip_addr, username="root", password=self.__ssh_key
+            )
+            return True
+
+        except Exception as e:
+            print(f"[SSH Error] - {e}")
+            return False
+
+    def run_script(self):
+        SHELL_FILE = os.path.join(os.getcwd(), "build", f"re_{self.__app_type}.sh")
+
+        with open(SHELL_FILE, "r") as fi:
+            commands = fi.readlines()
+
+        commands = [command.rstrip("\n") for command in commands if command != "\n"]
+
+        for command in commands:
+            if command[0] == "#":
+                print(f"[LOG] - {command}")
+                self.__status = command[2:]
+                current_task.update_state(
+                    state=self.__status, meta={"process_percent": "randomize"}
+                )
+
+                continue
+
+            print(f"Running: {command}")
+
+            command = "TERM=xterm " + command
+            stdin, stdout, stderr = self.__ssh_client.exec_command(command)
+
+            stdin.close()
+            _output = stdout.read()
+            _error = stderr.read()
+
+            output = _output.decode()
+            error = _error.decode()
+
+            if error != "" and output == "":
+                print(f"Error - {error}")
+                current_task.update_state(state=error, meta={"error": "randomize"})
+                return {"error": error}
+
+        if self.__env_vars:
+            env_var_command = self.__parse_env()
+            self.__ssh_client.exec_command(
+                f"sudo sed -i '5s|.*|{env_var_command}|' /etc/supervisor/conf.d/app.conf",
+                get_pty=True,
+            )
+
+            # * Make supervisor read new changes
+            stdin, stdout, stderr = self.__ssh_client.exec_command(
+                "sudo supervisorctl reread"
+            )
+
+            stdout = stdout.read()
+            stderr = stderr.read()
+
+            if stderr != "" and stdout == "":
+                return {"error": error}
+
+            stdin, stdout, stderr = self.__ssh_client.exec_command(
+                "sudo supervisorctl reload"
+            )
+
+            stdout = stdout.read()
+            stderr = stderr.read()
+
+            if stderr != "" and stdout == "":
+                return {"error": error}
+
+    def run(self, ip_addr: str, ssh_key: str, app_type: str, env: dict) -> Dict:
+        self.__ssh_client: SSHClient() = paramiko.client.SSHClient()
+        self.__ip_addr: str = ip_addr
+        self.__ssh_key: str = r"""VeQa7vYzwDb2]lz,.ZFeSJ94HsD>c4H_P#kz:W7]+bA2Ze:7EUl\nY#E'_g+w6W9j7:m;9*X^[q,rdEmVe'_iXDWOT:"""
+
+        self.__app_type: str = app_type
+        self.__env_vars: dict = env
+
+        self.connect()
+        result = self.run_script()
+
+        return result
 
 
 def task_log(task_id: str):
@@ -175,3 +276,4 @@ def task_log(task_id: str):
 
 
 DeployTask = celery.register_task(Deploy())
+ReDeployTask = celery.register_task(ReDeploy())
