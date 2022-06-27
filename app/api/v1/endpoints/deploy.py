@@ -29,6 +29,9 @@ def redeploy_from_github(request_body: ReDeployRepo):
     app_type = request_body.app_type
     env = request_body.env
 
+    encoded_ssh_key = ssh_key.encode()
+    ssh_key = encoded_ssh_key.decode("unicode_escape")
+
     result = ReDeployTask.delay(ip_addr, ssh_key, app_type, env)
 
     return {"task_id": result.task_id}

@@ -26,7 +26,7 @@ CONST_SUPERVISOR_CONFIG = {
     "fastapi": "/root/app/venv/bin/uvicorn main:app --reload",
     "node": "npm run start",
     "react": "npm run build",
-    "flask": "root/app/venv/bin/gunicorn main:app"
+    "flask": "root/app/venv/bin/gunicorn main:app",
 }
 
 
@@ -158,8 +158,7 @@ class Deploy(celery.Task):
     ) -> Dict:
         self.__ssh_client: SSHClient = paramiko.client.SSHClient()
         self.__ip_addr: str = ip_addr
-        self.__ssh_key: str = r"""7Ou`ZS&?+6Jn80&jS(iMxCAK2?YN5m#d,ib`!=dfd]XwD@8hTXh@UY$fNy;HjmdAo*"#<67Lk7GG0%g`4Uca68YB"%9Q?0h#-W3*k"""
-
+        self.__ssh_key: str = ssh_key
         self.__app_type: str = app_type
         self.__git_repo: str = repo_url
         self.__env_vars: dict = env
@@ -260,8 +259,7 @@ class ReDeploy(celery.Task):
     def run(self, ip_addr: str, ssh_key: str, app_type: str, env: dict) -> Dict:
         self.__ssh_client: SSHClient() = paramiko.client.SSHClient()
         self.__ip_addr: str = ip_addr
-        self.__ssh_key: str = r"""VeQa7vYzwDb2]lz,.ZFeSJ94HsD>c4H_P#kz:W7]+bA2Ze:7EUl\nY#E'_g+w6W9j7:m;9*X^[q,rdEmVe'_iXDWOT:"""
-
+        self.__ssh_key: str = ssh_key
         self.__app_type: str = app_type
         self.__env_vars: dict = env
 
