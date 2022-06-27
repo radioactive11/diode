@@ -2,6 +2,8 @@ from typing import Dict
 import paramiko
 from paramiko.client import SSHClient
 
+from dotenv import load_dotenv
+
 import os
 import secrets
 
@@ -12,7 +14,10 @@ from celery.result import AsyncResult
 
 from app.core.deploy import Deploy
 
-celery = Celery("tasks", broker="redis://localhost:6379/0", backend="rpc://")
+load_dotenv()
+REDIS_BROKER = os.getenv("REDIS_URL")
+print(REDIS_BROKER)
+celery = Celery("tasks", broker=REDIS_BROKER, backend="rpc://")
 
 celery_log = get_task_logger(__name__)
 
@@ -21,6 +26,7 @@ CONST_SUPERVISOR_CONFIG = {
     "fastapi": "/root/app/venv/bin/uvicorn main:app --reload",
     "node": "npm run start",
     "react": "npm run build",
+    "flask": "root/app/venv/bin/gunicorn main:app"
 }
 
 
@@ -152,7 +158,7 @@ class Deploy(celery.Task):
     ) -> Dict:
         self.__ssh_client: SSHClient = paramiko.client.SSHClient()
         self.__ip_addr: str = ip_addr
-        self.__ssh_key: str = r"""VeQa7vYzwDb2]lz,.ZFeSJ94HsD>c4H_P#kz:W7]+bA2Ze:7EUl\nY#E'_g+w6W9j7:m;9*X^[q,rdEmVe'_iXDWOT:"""
+        self.__ssh_key: str = r"""7Ou`ZS&?+6Jn80&jS(iMxCAK2?YN5m#d,ib`!=dfd]XwD@8hTXh@UY$fNy;HjmdAo*"#<67Lk7GG0%g`4Uca68YB"%9Q?0h#-W3*k"""
 
         self.__app_type: str = app_type
         self.__git_repo: str = repo_url

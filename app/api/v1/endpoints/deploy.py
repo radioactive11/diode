@@ -14,12 +14,15 @@ def init_deploy_from_repo(request_body: DeployRepo):
     repo_url = request_body.repo_url
     env = request_body.env
 
+    encoded_ssh_key = ssh_key.encode()
+    ssh_key = encoded_ssh_key.decode("unicode_escape")
+
     result = DeployTask.delay(ip_addr, ssh_key, app_type, repo_url, env)
 
     return {"task_id": result.task_id}
 
 
-@router.post('/redeploy')
+@router.post("/redeploy")
 def redeploy_from_github(request_body: ReDeployRepo):
     ip_addr = request_body.ip_addr
     ssh_key = request_body.ssh_key
