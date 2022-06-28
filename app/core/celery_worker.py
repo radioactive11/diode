@@ -5,6 +5,7 @@ from paramiko.client import SSHClient
 from dotenv import load_dotenv
 
 import os
+import time
 import secrets
 
 import celery
@@ -17,7 +18,8 @@ from app.core.deploy import Deploy
 load_dotenv()
 REDIS_BROKER = os.getenv("REDIS_URL")
 print(REDIS_BROKER)
-celery = Celery("tasks", broker=REDIS_BROKER, backend="rpc://")
+# celery = Celery("tasks", broker=REDIS_BROKER, backend="rpc://")
+celery = Celery("tasks", broker="redis://localhost:6379/0", backend="rpc://")
 
 celery_log = get_task_logger(__name__)
 
@@ -47,9 +49,14 @@ class Deploy(celery.Task):
 
     def connect(self) -> bool:
         self.__ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        print(f"Connecting to {self.__ip_addr} with SSH Key: {self.__ssh_key}")
         try:
             self.__ssh_client.connect(
-                self.__ip_addr, username="root", password=self.__ssh_key
+                self.__ip_addr,
+                username="root",
+                password=self.__ssh_key,
+                timeout=60,
+                auth_timeout=60,
             )
             return True
 
