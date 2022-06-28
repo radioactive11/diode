@@ -73,16 +73,15 @@ class Deploy(celery.Task):
             "$REDIS_PW": password,
         }
 
-        for command in commands:
+        for ctr, command in enumerate(commands):
             for token in lookup:
-                print(token)
                 command = command.replace(token, lookup[token])
 
             if command[0] == "#":
                 print(f"[LOG] - {command}")
                 self.__status = command[2:]
                 current_task.update_state(
-                    state=self.__status, meta={"process_percent": "randomize"}
+                    state=self.__status, meta={"process_percent": ctr / len(commands)}
                 )
 
                 continue
@@ -101,7 +100,7 @@ class Deploy(celery.Task):
 
             if error != "" and output == "":
                 print(f"Error - {error}")
-                current_task.update_state(state=error, meta={"error": "randomize"})
+                current_task.update_state(state=error, meta={"error": "Exiting"})
                 return {"error": error}
 
         # * if we need to setup supervisor & nginx for the app
