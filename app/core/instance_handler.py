@@ -17,7 +17,6 @@ def create_instance(details: instance.CreateInstance, client: LinodeClient) -> D
     ip4_addr = new_linode.ipv4[0]
     _id = new_linode.id
 
-
     return {
         "id": _id,
         "ip4_addr": ip4_addr,
@@ -34,7 +33,10 @@ def delete_instance(details: instance.DeleteInstance, client: LinodeClient) -> b
 
 def get_metrics(id: str, client: LinodeClient):
     instance = Instance(client, id)
-    result = instance.stats
+    try:
+        result = instance.stats
+    except Exception as e:
+        result = {"error": e}
 
     return result
 
