@@ -28,7 +28,7 @@
     ·
     <a href="https://github.com/kg-kartik?tab=repositories/">User Backend</a>
     ·
-    <a href="https://github.com/radioactive11/diode">View Demo</a>
+    <a href="https://diode.radioactive11.com">View Demo</a>
     ·
     <a href="https://github.com/radioactive11/diode/issues">Report Bug</a>
     ·
@@ -75,6 +75,7 @@ Diode is a platform that lets you deploy your web apps on Linode in two easy ste
 
 
 ### Built With
+<p>
 <img alt="FastAPI" src="https://img.shields.io/badge/fastapi-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
 <img alt="FastAPI" src="https://img.shields.io/badge/celery-37814A?style=for-the-badge&logo=celery&logoColor=white"/>
 <img alt="FastAPI" src="https://img.shields.io/badge/redis-DC382D?style=for-the-badge&logo=redis&logoColor=white"/>
@@ -194,7 +195,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 - [Gautam Arora](https://github.com/Gautam-Arora24)
 - [Esha Baweja](https://github.com/eshabaweja)
 
-Project Link: [https://github.com/radioactive11/diode](https://github.com/radioactive11/diode)
+Project Link: [https://diode.radioactive11.com](https://diode.radioactive11.com)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
