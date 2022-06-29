@@ -36,7 +36,7 @@ def get_metrics(id: str, client: LinodeClient):
     try:
         result = instance.stats
     except Exception as e:
-        result = {"error": e}
+        result = {"data": e}
 
     return result
 
