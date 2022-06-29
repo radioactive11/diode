@@ -13,7 +13,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/radioactive11/diode">
-    <img src="STATIC/logo.png" alt="Logo" width="100" height="100">
+    <img src="STATIC/logo.png" alt="Logo" width="150" height="150">
   </a>
 
   <h3 align="center">Diode</h3>
@@ -208,15 +208,15 @@ Project Link: [https://github.com/radioactive11/diode](https://github.com/radioa
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/0xCompyler/obsidian-server.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/radioactive11/diode.svg?style=for-the-badge
 [contributors-url]: https://github.com/radioactive11/diode/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/0xCompyler/obsidian-server.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/radioactive11/diode.svg?style=for-the-badge
 [forks-url]: https://github.com/radioactive11/diode/network/members
-[stars-shield]: https://img.shields.io/github/stars/0xCompyler/obsidian-server.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/radioactive11/diode.svg?style=for-the-badge
 [stars-url]: https://github.com/radioactive11/diode/stargazers
-[issues-shield]: https://img.shields.io/github/issues/0xCompyler/obsidian-server.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/radioactive11/diode.svg?style=for-the-badge
 [issues-url]: https://github.com/radioactive11/diode/issues
-[license-shield]: https://img.shields.io/github/license/0xCompyler/obsidian-server.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/radioactive11/diode.svg?style=for-the-badge
 [license-url]: https://github.com/radioactive11/diode/blob/master/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/arijit--roy
