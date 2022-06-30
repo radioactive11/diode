@@ -26,7 +26,7 @@
     <br />
     <a href="https://github.com/kg-kartik/moonlight-client/">Frontend</a>
     ·
-    <a href="https://github.com/kg-kartik/diode-client/">User Backend</a>
+    <a href="https://github.com/kg-kartik/diode-backend/">User Backend</a>
     ·
     <a href="https://diode.radioactive11.com">View Demo</a>
     ·
